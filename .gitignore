@@ -9,3 +9,7 @@ test/launcher/*.z64
 test/out/
 test/rchash
 __pycache__/
+test/screenshots/sd/
+test/screenshots/sd.img
+test/screenshots/*.png
+test/screenshots/gopher64.log

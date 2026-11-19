@@ -61,16 +61,28 @@ dumps it supports (Supported Game Files).
 
 ## Themes
 
-The menu build comes in two themes:
-**Trophy Night** (deep navy and trophy gold, the default) and **Gold
-Rush** (cream and gold, dark ink). Each sets the menu's colours (text,
+The menu build comes in two themes. Each sets the menu's colours (text,
 borders, tabs, highlights, scroll bars, dialogs) and has a built-in
 background that shows until you set your own (a background you pick in
-the menu still takes over, tinted to suit the theme). A background set
-in the stock menu is not carried over: this menu keeps its own
-(`menu/cache/background-n64ra.data`). See
-`menu/theme/preview.png`; the backgrounds are drawn by
-`menu/theme/make_theme_bg.py`.
+the menu still takes over, tinted to suit the theme).
+
+**Trophy Night** (deep navy and trophy gold, the default, `sc64menu-trophynight.n64`):
+
+![Trophy Night: the file browser, a game's screen with Achievements On, and its options with RetroAchievements (USB)](docs/trophy-night.png)
+
+**Gold Rush** (cream and gold, dark ink, `sc64menu-goldrush.n64`):
+
+![Gold Rush: the file browser, a game's screen with Achievements On, and its options with RetroAchievements (USB)](docs/gold-rush.png)
+
+Left to right: the file browser, a game's screen (Achievements: On, with
+its box art and description from `menu/metadata`), and the game's
+options (R), where RetroAchievements (USB) is turned on. The game here
+is a demo cartridge made from the test ROM, with its own box art.
+
+A background set in the stock menu is not carried over: this menu keeps
+its own (`menu/cache/background-n64ra.data`). The backgrounds are drawn
+by `menu/theme/make_theme_bg.py`; the screenshots are taken in gopher64
+by `test/screenshots/shoot.sh`.
 
 ## How it works
 
@@ -177,6 +189,7 @@ the bridge and a mock xeRAbora:
 | Folder | What |
 |---|---|
 | `agent/` | the agent: `entry.S` (patcher, exception engine), `agent.c`, `n64ra.h` |
+| `docs/` | screenshots of the themes |
 | `app/` | N64RA Bridge, the Mac app: `n64ra_gui.pyw` (the window), `build_mac.sh`, `macos/` (launcher, Info.plist, icon) |
 | `bridge/` | `n64ra_bridge.py`: SC64 (USB serial) or gopher64 (TCP) to xeRAbora |
 | `menu/` | `n64flashcartmenu-n64ra.patch` for N64FlashcartMenu `cdb9eec`, the built menus (`sc64menu.n64` Trophy Night, `sc64menu-goldrush.n64`), `theme/` |
