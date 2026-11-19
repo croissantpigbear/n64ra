@@ -1,0 +1,11 @@
+*.elf
+*.o
+agent/agent.bin
+agent/agent_blob.h
+test/game/game.bin
+test/launcher/build/
+test/launcher/game_bin.h
+test/launcher/*.z64
+test/out/
+test/rchash
+__pycache__/

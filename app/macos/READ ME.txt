@@ -1,0 +1,31 @@
+N64RA Bridge for Mac
+====================
+
+RetroAchievements on a real Nintendo 64, through a SummerCart64.
+Nothing to install: Python is included (Intel and Apple silicon).
+
+1. Drag "N64RA Bridge" into your Applications folder.
+
+2. First open: the app is not notarised, so macOS refuses it once.
+   Open System Settings > Privacy & Security, scroll down and press
+   "Open Anyway" next to N64RA Bridge.
+   Or in Terminal:  xattr -dr com.apple.quarantine "/Applications/N64RA Bridge.app"
+
+3. Plug the SC64's USB port into the Mac and press Start. If macOS asks
+   to let N64RA Bridge find devices on your local network, say Allow
+   (xeRAbora is reached over the network, even on the same Mac).
+
+4. xeRAbora (the RetroAchievements client) starts with the bridge. The
+   app finds one you already have (Downloads, Desktop, or one another
+   app downloaded), or press Download. Sign in on its page once.
+
+5. On the N64: put sc64menu.n64 from n64ra on the SD card, pick a game,
+   press R for its options, set "RetroAchievements (USB)" to Enabled, and
+   start it (an Expansion Pak is needed).
+
+The window shows the game, its RetroAchievements hash, whether its
+achievements are tracked, the frames sent, the USB link and the unlocks.
+The first time a game starts, the bridge reads it back from the SC64 to
+identify it (about 1 1/2 minutes for a 64 MB game).
+
+If xeRAbora is already running, the app uses that one.

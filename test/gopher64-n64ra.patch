@@ -1,0 +1,100 @@
+diff --git a/src/device/cart/sc64.rs b/src/device/cart/sc64.rs
+index 3f97169..2a7e402 100644
+--- a/src/device/cart/sc64.rs
++++ b/src/device/cart/sc64.rs
+@@ -285,6 +285,17 @@ pub fn write_regs(device: &mut device::Device, address: u64, value: u32, mask: u
+                                         );
+                                     i += 1;
+                                 }
++                            } else if (0x1FFE0000..0x1FFE2000).contains(&address) {
++                                // the SC64's data buffer (BlockRAM), as the firmware allows
++                                while i < length {
++                                    *usb_buffer.get_mut(i).unwrap_or(&mut 0) = *device
++                                        .cart
++                                        .sc64
++                                        .buffer
++                                        .get((address as usize + i) & SC64_BUFFER_MASK)
++                                        .unwrap_or(&0);
++                                    i += 1;
++                                }
+                             } else {
+                                 panic!("Unknown address {address:#x} for SC64 M command");
+                             }
+@@ -326,6 +337,18 @@ pub fn write_regs(device: &mut device::Device, address: u64, value: u32, mask: u
+                                 );
+                                 i += 1;
+                             }
++                        } else if (0x1FFE0000..0x1FFE2000).contains(&address) {
++                            while i < length {
++                                if let Some(b) = device
++                                    .cart
++                                    .sc64
++                                    .buffer
++                                    .get_mut((address as usize + i) & SC64_BUFFER_MASK)
++                                {
++                                    *b = *usb_buffer.get(i).unwrap_or(&0);
++                                }
++                                i += 1;
++                            }
+                         } else {
+                             panic!("Unknown address {address:#x} for SC64 m command");
+                         }
+diff --git a/src/device/exceptions.rs b/src/device/exceptions.rs
+index e510345..32a29c2 100644
+--- a/src/device/exceptions.rs
++++ b/src/device/exceptions.rs
+@@ -85,6 +85,14 @@ pub fn cop_unusable_exception(device: &mut device::Device, cop: u64) {
+     exception_general(device, 0x180)
+ }
+ 
++/// Watch exception (exception code 23): a store to the doubleword set in
++/// WatchLo, with its W bit on. Cheat engines (GameShark, N64FlashcartMenu)
++/// use it to catch a game installing its exception handler.
++pub fn watch_exception(device: &mut device::Device) {
++    set_exception_cause(device, 23 << 2);
++    exception_general(device, 0x180)
++}
++
+ pub fn address_error_exception(device: &mut device::Device, address: u64) {
+     set_exception_cause(device, device::cop0::COP0_CAUSE_EXCCODE_ADEL);
+     device.cpu.cop0.regs[device::cop0::COP0_BADVADDR_REG] = address;
+diff --git a/src/device/memory.rs b/src/device/memory.rs
+index 7e6498a..dc3be5a 100644
+--- a/src/device/memory.rs
++++ b/src/device/memory.rs
+@@ -76,13 +76,34 @@ pub fn translate_address(
+             return (phys_address, cached.then_some(address), err);
+         }
+     }
++    let phys_address = address & 0x1FFFFFFF;
++    if watch_hit(device, phys_address, &access_type) {
++        return (phys_address, None, true);
++    }
+     (
+-        address & 0x1FFFFFFF,
++        phys_address,
+         (address & 0x20000000 == 0).then_some(address),
+         false,
+     )
+ }
+ 
++/// Stores to the WatchLo doubleword raise a watch exception (not while
++/// EXL or ERL is set), before the store happens.
++fn watch_hit(device: &mut device::Device, phys_address: u64, access_type: &AccessType) -> bool {
++    let watch_lo = device.cpu.cop0.regs[18];
++    if !matches!(access_type, AccessType::Write)
++        || watch_lo & 1 == 0
++        || device.cpu.cop0.regs[device::cop0::COP0_STATUS_REG]
++            & (device::cop0::COP0_STATUS_EXL | device::cop0::COP0_STATUS_ERL)
++            != 0
++        || (phys_address & 0x1FFFFFF8) != (watch_lo & 0x1FFFFFF8)
++    {
++        return false;
++    }
++    device::exceptions::watch_exception(device);
++    true
++}
++
+ // Uncached CPU write costs (n64-systembench: RDRAM U32W, RCP I/O W)
+ fn write_cycles(phys_address: u64) -> u64 {
+     match phys_address as usize {
