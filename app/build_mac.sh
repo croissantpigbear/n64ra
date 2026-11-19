@@ -26,15 +26,20 @@ prune() { # python root, stdlib dir: drop what the window never uses
   find "$1" -name __pycache__ -type d -prune -exec rm -rf {} +
 }
 W="$CACHE/pyserial-$PYSERIAL-py2.py3-none-any.whl"
-[ -s "$W" ] || pip download -q "pyserial==$PYSERIAL" --no-deps -d "$CACHE"
+[ -s "$W" ] || python3 -m pip download -q "pyserial==$PYSERIAL" --no-deps -d "$CACHE"
 
-# launcher: one universal binary
-ZIG=""; command -v zig >/dev/null && ZIG=zig
-[ -z "$ZIG" ] && python3 -m ziglang version >/dev/null 2>&1 && ZIG="python3 -m ziglang"
-LIPO=$(command -v lipo || command -v llvm-lipo || ls /usr/bin/llvm-lipo-* 2>/dev/null | head -1)
-$ZIG cc -target aarch64-macos.11.0 -O2 -Wl,-headerpad_max_install_names -o build/l-arm64 macos/launcher.c
-$ZIG cc -target x86_64-macos.10.15 -O2 -Wl,-headerpad_max_install_names -o build/l-x86_64 macos/launcher.c
-"$LIPO" -create build/l-arm64 build/l-x86_64 -output build/launcher
+# launcher: one universal binary (Xcode's clang on a Mac, zig elsewhere)
+if [ "$(uname)" = Darwin ] && xcrun --show-sdk-path >/dev/null 2>&1; then
+  clang -arch arm64 -arch x86_64 -mmacosx-version-min=10.15 -O2 -Wl,-headerpad_max_install_names \
+    -o build/launcher macos/launcher.c
+else
+  ZIG=""; command -v zig >/dev/null && ZIG=zig
+  [ -z "$ZIG" ] && python3 -m ziglang version >/dev/null 2>&1 && ZIG="python3 -m ziglang"
+  LIPO=$(command -v lipo || command -v llvm-lipo || ls /usr/bin/llvm-lipo-* 2>/dev/null | head -1)
+  $ZIG cc -target aarch64-macos.11.0 -O2 -Wl,-headerpad_max_install_names -o build/l-arm64 macos/launcher.c
+  $ZIG cc -target x86_64-macos.10.15 -O2 -Wl,-headerpad_max_install_names -o build/l-x86_64 macos/launcher.c
+  "$LIPO" -create build/l-arm64 build/l-x86_64 -output build/launcher
+fi
 
 APP="build/N64RA Bridge.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/app"

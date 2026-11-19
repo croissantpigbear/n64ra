@@ -17,6 +17,9 @@ USB cable from the SC64 to the machine running the bridge, and xeRAbora.
 
 ## Using it
 
+Downloads (the Mac app and the two menus) are on the
+[Releases page](https://github.com/croissantpigbear/n64ra/releases/latest).
+
 1. Copy `menu/sc64menu.n64` to the root of the SC64's SD card (it
    replaces the stock menu; keep a copy of yours). That build has the
    Trophy Night theme; for Gold Rush, copy `menu/sc64menu-goldrush.n64`
@@ -29,8 +32,8 @@ USB cable from the SC64 to the machine running the bridge, and xeRAbora.
    "Achievements: On". It is remembered per game. Cheats are off while
    it is on.
 3. Plug the SC64's USB port into the computer and run the bridge. On a
-   Mac, use the **N64RA Bridge** app (`app/`, download
-   `N64RA-Bridge-mac.zip`): press Start and it finds the SC64, starts
+   Mac, use the **N64RA Bridge** app (`N64RA-Bridge-mac.zip` from
+   Releases; source in `app/`): press Start and it finds the SC64, starts
    xeRAbora and shows the game, the frames and the unlocks. Or from a
    terminal (any PC or a Pi):
 
